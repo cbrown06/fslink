@@ -18,7 +18,7 @@
         <header class="inner">
           <a id="forkme_banner" href="https://github.com/cbrown06/fslink">View on GitHub</a>
 
-          <h1 id="project_title">Fslink</h1>
+          <h1 id="project_title">&lt;fslink&gt;</h1>
           <h2 id="project_tagline">Task for Apache Ant to create and delete symbolic links on Windows and Linux, using Java NIO APIs.</h2>
 
             <section id="downloads">
@@ -31,10 +31,49 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h1>
-<a name="fslink" class="anchor" href="#fslink"><span class="octicon octicon-link"></span></a>fslink</h1>
 
-<p>Task for Apache Ant to create and delete symbolic links on Windows and Linux, using Java NIO APIs.</p>
+<p>
+This project provides two Ant tasks, <code>&lt;createlink&gt;</code> and <code>&lt;deletelink&gt;</code>, for creating and deleting symbolic links, respectively.
+</p>
+
+<p>
+Unlike Ant's built-in <code>&lt;symlink&gt;</code> task, these tasks are implemented using Java 7 NIO APIs, making them more cross-platform than the built-in task.
+These tasks are also more straightforward (as in, they do not have as many options).
+</p>
+
+<p>
+Assuming you have built the project (using Ant and <code>build.xml</code>, part of the project), you can copy the output artifact <code>fslink.jar</code> into your project's source tree.
+For example:
+<blockquote><code>
+&lt;taskdef name="createlink"<br/>&nbsp;&nbsp; classname="io.github.cbrown06.fslink.CreateLinkTask"<br/>&nbsp;&nbsp; classpath="fslink.jar"/&gt;<br/>
+&lt;taskdef name="deletelink"<br/>&nbsp;&nbsp; classname="io.github.cbrown06.fslink.DeleteLinkTask"<br/>&nbsp;&nbsp; classpath="fslink.jar"/&gt;
+</code></blockquote>
+</p>
+
+<p>
+The <code>&lt;createlink&gt;</code> task creates a link pointing to a resource, optionally overwriting any existing resource.
+It can be configured to either fail on error (halting the build), or just echo a warning.
+Usage is as follows:
+<blockquote><code>
+&lt;createlink failonerror="true"<br/>&nbsp;&nbsp; overwrite="false"<br/>&nbsp;&nbsp; link="<em>link-to-create</em>"<br/>&nbsp;&nbsp; resource="<em>regular-file</em>"/&gt;
+</code></blockquote>
+</p>
+
+<p>
+The <code>&lt;deletelink&gt;</code> task deletes a link pointing to a resource, doing nothing if no such link exists.
+It will not delete regular files.
+It can be configured to either fail on error (halting the build), or just echo a warning.
+Usage is as follows:
+<blockquote><code>
+&lt;deletelink failonerror="true"<br/>&nbsp;&nbsp; link="<em>link-to-delete</em>"/&gt;
+</code></blockquote>
+</p>
+
+<p>
+Note however, that even if these tasks are implemented using cross-platform APIs, when used with Windows, you must ensure that the user executing the build script has appropriate privileges (this is not the case by default).
+Windows permissions are granted using the Group Policy Editor (which may require you to log out and then back in again).<br/>
+Computer configuration | Windows Settings | Security Settings | Local Policies | User Rights Assignment | Create symbolic links.
+</p>
       </section>
     </div>
 
