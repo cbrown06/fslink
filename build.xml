@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="fslink" default="dist">
+
+	<!-- build settings                                                    -->
+	<property name="app.dist-bin"     value="${basedir}/artifacts/bin"/>
+	<property name="app.temp-dir"     value="${basedir}/artifacts/temp"/>
+
+    <!-- Versioning information                                            -->
+    <property name="fslink.version"   value="1.0.0"/>
+	<property name="build.targetjdk"  value="1.7"/>
+
+    <!-- Load extra task definitions                                       -->
+    <taskdef name="if"
+             classname="net.sf.antcontrib.logic.IfTask"
+             classpath="lib/ant-contrib.jar"/>
+
+
+    <target name="clean-temp" description="Deletes temporary files">
+
+        <if>
+            <available file="${app.temp-dir}" type="dir" property="artifacts.temp.exists"/>
+            <then>
+                <delete dir="${app.temp-dir}"/>
+            </then>
+        </if>
+
+    </target>
+
+
+    <target name="init">
+
+        <!-- check java version -->
+        <if>
+            <not>
+                <equals arg1="${ant.java.version}" arg2="${build.targetjdk}"/>
+            </not>
+            <then>
+                <fail message="Detected Java JDK ${ant.java.version}!  You must compile &quot;${ant.project.name}&quot; using JDK ${build.targetjdk}."/>
+            </then>
+        </if>
+
+        <tstamp>
+            <format property="jar.build.tstamp" pattern="yyyy-MM-dd'T'HH:mm:ssz" locale="en,US" timezone="UTC"/>
+        </tstamp>
+
+		<property name="build.compiler"   value="modern"/>
+		<property name="build.debuginfo"  value="on"/>
+
+    </target>
+
+
+    <target name="dist" depends="init" description="Compiles and packages artifacts">
+
+		<echo level="info">Output directory: ${app.dist-bin}</echo>
+
+		<mkdir dir="${app.dist-bin}"/>
+		<mkdir dir="${app.temp-dir}"/>
+
+        <property name="dir.tasks.classes" value="${app.temp-dir}/classes"/>
+        <mkdir dir="${dir.tasks.classes}"/>
+
+        <javac srcdir="src/main" destdir="${dir.tasks.classes}" includes="io/github/cbrown06/**" includeantruntime="false"
+               debug="true" source="${build.targetjdk}" target="${build.targetjdk}">
+            <classpath>
+                <pathelement path="lib/ant-compile.jar"/>
+            </classpath>
+        </javac>
+
+        <jar destfile="${app.dist-bin}/${ant.project.name}.jar">
+            <zipfileset dir="${dir.tasks.classes}">
+                <include name="io/github/cbrown06/**/*"/>
+            </zipfileset>
+            <manifest>
+                <attribute name="Implementation-Title" value="Fslink Ant Tasks"/>
+                <attribute name="Implementation-URL" value="http://cbrown06.github.io/fslink/"/>
+                <attribute name="Implementation-Version" value="${fslink.version}"/>
+                <attribute name="Sealed" value="true"/>
+            </manifest>
+        </jar>
+
+    </target>
+
+</project>

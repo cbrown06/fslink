@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="fslinktest" default="run">
+
+	<!-- build settings                                                    -->
+	<property name="app.dist-bin" value="${basedir}/artifacts/bin"/>
+	<property name="app.temp-dir" value="${basedir}/artifacts/temp"/>
+	<property name="tasks.jar" location="${app.dist-bin}/fslink.jar"/>
+
+	<!-- Load extra task definitions (requires Java7, minimum)             -->
+	<taskdef name="if"
+			 classname="net.sf.antcontrib.logic.IfTask"
+			 classpath="lib/ant-contrib.jar"/>
+	<taskdef name="trycatch"
+			 classname="net.sf.antcontrib.logic.TryCatchTask"
+			 classpath="lib/ant-contrib.jar"/>
+
+
+	<target name="clean-temp" description="Deletes temporary files">
+
+		<if>
+			<available file="${app.temp-dir}" type="dir"
+					   property="artifacts.temp.exists"/>
+			<then>
+				<delete dir="${app.temp-dir}"/>
+			</then>
+		</if>
+
+	</target>
+
+
+	<target name="run" description="Tests artifacts built with main script">
+
+		<trycatch>
+			<try>
+				<taskdef name="mklink"
+						 classname="io.github.cbrown06.fslink.CreateLinkTask"
+						 classpath="${tasks.jar}"/>
+				<taskdef name="rmlink"
+						 classname="io.github.cbrown06.fslink.DeleteLinkTask"
+						 classpath="${tasks.jar}"/>
+				<echo>Loaded tasks from ${tasks.jar}</echo>
+			</try>
+			<catch>
+				<fail>Failed to load tasks from ${tasks.jar}</fail>
+			</catch>
+		</trycatch>
+
+		<property name="test.dir" location="${app.temp-dir}/tests"/>
+		<property name="test.link" location="${test.dir}/tlink.txt"/>
+		<property name="test.resource" location="${test.dir}/tresource.txt"/>
+
+		<mkdir dir="${test.dir}"/>
+		<echo file="${test.resource}" encoding="UTF-8">Hello, world!</echo>
+
+		<echo level="info">Testing creation of symlink (1)</echo>
+		<mklink failonerror="true"
+					link="${test.link}" resource="${test.resource}" overwrite="true"/>
+		<loadfile failonerror="true" encoding="UTF-8"
+				  srcfile="${test.link}" property="test.contents"/>
+		<echo level="info">Read (via link): ${test.contents}</echo>
+
+		<echo level="info">Testing creation of symlink (2) - prevent: overwrite</echo>
+		<mklink failonerror="false"
+				link="${test.link}" resource="${test.resource}" overwrite="false"/>
+		<trycatch>
+			<try>
+				<mklink failonerror="true"
+						link="${test.link}" resource="${test.resource}" overwrite="false"/>
+			</try>
+			<catch>
+				<echo level="info">Testing creation of symlink (2) - prevented: overwrite</echo>
+			</catch>
+		</trycatch>
+
+		<echo level="info">Testing creation of symlink (3) - allow: overwrite</echo>
+		<mklink failonerror="true"
+				link="${test.link}" resource="${test.resource}" overwrite="true"/>
+
+		<echo level="info">Testing deletion of symlink (4)</echo>
+		<rmlink failonerror="true" link="${test.link}"/>
+		<if>
+			<available file="${test.link}" property="test.link.not-deleted1"/>
+			<then>
+				<fail>Not deleted! ${test.link}</fail>
+			</then>
+		</if>
+
+		<echo level="info">Testing deletion of symlink (5) - with no such file</echo>
+		<rmlink failonerror="true" link="${test.link}"/>
+
+		<echo level="info">Testing regular file (6) - prevent: delete</echo>
+		<echo file="${test.link}" encoding="UTF-8">Replacement file</echo>
+		<trycatch>
+			<try>
+				<rmlink failonerror="true" link="${test.link}"/>
+			</try>
+			<catch>
+				<echo level="info">Testing regular file (6) - prevented: delete</echo>
+			</catch>
+		</trycatch>
+
+		<echo level="info">Testing regular file (7) - warn, skip delete</echo>
+		<rmlink failonerror="false" link="${test.link}"/>
+		<if>
+			<not><available file="${test.link}" property="test.link.not-deleted2"/></not>
+			<then>
+				<fail>Did not prevent: delete! ${test.link}</fail>
+			</then>
+		</if>
+
+		<echo level="info">Delete, clean-up.</echo>
+		<delete file="${test.link}"/>
+
+	</target>
+
+</project>
