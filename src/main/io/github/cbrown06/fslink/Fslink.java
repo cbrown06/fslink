@@ -30,8 +30,8 @@ public final class Fslink
 
 	public boolean create(final boolean overwrite) throws IOException
 	{
-		// check if resource exists; if it does, check that it's a file (following links)
-		if (_resource == null || !Files.isRegularFile(_resource))
+		// check if resource exists; if it does, check that it exists (following links)
+		if (_resource == null || !Files.exists(_resource))
 		{
 			throw new FileNotFoundException(Objects.toString(_resource));
 		}
