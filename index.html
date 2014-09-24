@@ -32,6 +32,7 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
 
+<h2>Overview</h2>
 <p>
 This project provides two Ant tasks, <code>&lt;createlink&gt;</code> and <code>&lt;deletelink&gt;</code>, for creating and deleting symbolic links, respectively.
 </p>
@@ -69,11 +70,29 @@ Usage is as follows:
 </code></blockquote>
 </p>
 
+<h2>Usage with Windows</h2>
 <p>
-Note however, that even if these tasks are implemented using cross-platform APIs, when used with Windows, you must ensure that the user executing the build script has appropriate privileges (this is not the case by default).
-Windows permissions are granted using the Group Policy Editor (which may require you to log out and then back in again).<br/>
-Computer configuration | Windows Settings | Security Settings | Local Policies | User Rights Assignment | Create symbolic links.
+Unlike the <code>&lt;symlink&gt;</code> task provided by Ant, these tasks do <em>not</em> try to invoke the <code>ln</code> shell command
+(which will by default cause a build script to fail on Windows).  Standard cross-platform Java7+ NIO APIs are used instead.
+<p>
+However, even if these tasks are implemented using cross-platform APIs, when used with Windows, you must ensure that the user executing the build script has appropriate privileges (this is not the case by default).
+Windows permissions are granted using the Group Policy Editor (which may require you to log out and then back in again).
 </p>
+<p>
+Start <code>gpedit.msc</code> from the Windows Command Prompt, and then grant permissions via
+<em>Computer configuration </em>&gt;
+<em>Windows Settings </em>&gt;
+<em>Security Settings </em>&gt;
+<em>Local Policies </em>&gt;
+<em>User Rights Assignment </em>&gt;
+<em>Create symbolic links</em> (see this <a href="images/gpedit.msc.png">screenshot</a>).
+You may need to log out of your Windows session and then log back in again (or use the <code>gpupdate</code> command) for these permissions to be effective.
+</p>
+<p>
+You will also need to run Ant as an administrator (for example, from the Start Menu, right-click "Command Prompt" and click on "Run as administrator").
+None of this is necessary on non-Windows operating systems.
+</p>
+
       </section>
     </div>
 
